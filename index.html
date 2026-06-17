@@ -164,29 +164,35 @@
     try {
       const res = await fetch(url);
       const blob = await res.blob();
-      const file = new File([blob], 'sticker-video.mp4', { type: 'video/mp4' });
+
+      // Derive name + type from the actual URL/blob so iOS Photos treats it right.
+      const ext  = (url.split('.').pop().split('?')[0] || 'mp4').toLowerCase();
+      const type = blob.type || (ext === 'mov' ? 'video/quicktime' : 'video/mp4');
+      const file = new File([blob], `sticker-video.${ext}`, { type });
 
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
         await navigator.share({ files: [file], title: 'Your video' });
       } else {
-        // fallback: blob download (Android Chrome / desktop)
+        // fallback: blob download (Android Chrome / desktop). A blob: URL is
+        // same-origin, so the download attribute is honored here.
         const a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
-        a.download = 'sticker-video.mp4';
+        a.download = `sticker-video.${ext}`;
         document.body.appendChild(a);
         a.click();
         a.remove();
+        URL.revokeObjectURL(a.href);
       }
     } catch (err) {
       console.warn('share failed:', err);
       // last resort: open the raw url
       window.open(url, '_blank');
     } finally {
-      if (btn) { btn.textContent = '⬇ Save video'; btn.disabled = false; }
+      if (btn) { btn.textContent = '⬇ Save to gallery'; btn.disabled = false; }
     }
   }
 
-  // Download page
+  // Download page — uses the url the server actually sent.
   function showDownloadPage(url) {
     player = null;   // player no longer on screen
     document.body.innerHTML = `
@@ -198,14 +204,7 @@
                style="width:100%; max-width:400px; border-radius:8px; background:#000;"></video>
         <button id="shareBtn"
            style="padding:14px 28px; font-size:18px; background:#0a84ff; color:#fff;
-                  border:none; border-radius:8px; cursor:pointer;">⬇ Save video</button>
-		<a
-      href="https://pub-50a3d579b806425aae0f35fc4ecb2c40.r2.dev/ttir-2661213573.mov"
-      download="video.mov"
-      class="download-btn"
-    >
-      ⬇️ Download
-    </a>
+                  border:none; border-radius:8px; cursor:pointer;">⬇ Save to gallery</button>
         <button id="backBtn"
            style="padding:12px 24px; font-size:16px; background:#333; color:#fff;
                   border:none; border-radius:8px; cursor:pointer;">← Back to start</button>
