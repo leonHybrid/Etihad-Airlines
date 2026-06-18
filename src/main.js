@@ -18,6 +18,10 @@ const startPageHTML = `
 
 let dragged = null;
 
+// Unique id handed to each placed sticker. Increments on every drop, resets to
+// 0 on Reset (and naturally on page reload for a new visitor).
+let nextStickerId = 0;
+
 const stickerList = ['⭐', '🟦', '❤️', '🟢', '☁️', '💎', '🌙', '🔺', '☀️', '❄️'];
 
 // Files live in public/videos/ and are served at <base>videos/<n>.mp4
@@ -47,7 +51,7 @@ function init() {
 
     el.addEventListener('pointerdown', (e) => {
       e.preventDefault();
-      dragged = { id: i, emoji };
+      dragged = { icon: i, emoji };
       el.setPointerCapture(e.pointerId);
     });
 
@@ -59,9 +63,11 @@ function init() {
       if (px >= 0 && py >= 0 && px <= rect.width && py <= rect.height) {
         const nx = px / rect.width;
         const ny = py / rect.height;
-        console.log('dropped', dragged.emoji, 'at', nx.toFixed(4), ny.toFixed(4));
-        placeSticker(scene, dragged.emoji, px, py, dragged.id);
-        sendSafe(`${nx.toFixed(4)} ${ny.toFixed(4)} ${dragged.id}`);
+        const instanceId = nextStickerId++;          // unique id for this placed sticker
+        console.log('dropped', dragged.emoji, 'as instance', instanceId);
+        placeSticker(scene, dragged.emoji, px, py, dragged.icon, instanceId);
+        // message format: x y instanceId iconId
+        sendSafe(`${nx.toFixed(4)} ${ny.toFixed(4)} ${instanceId} ${dragged.icon}`);
       }
       dragged = null;
     });
@@ -79,14 +85,16 @@ function init() {
   resetBtn.addEventListener('click', () => {
     sendSafe('reset');
     scene.querySelectorAll('.placed-sticker').forEach((el) => el.remove());
+    nextStickerId = 0;                               // ids start fresh after a reset
   });
 }
 
-function placeSticker(scene, emoji, x, y, id) {
+function placeSticker(scene, emoji, x, y, iconId, instanceId) {
   const el = document.createElement('div');
   el.className = 'placed-sticker';
   el.textContent = emoji;
-  el.dataset.id = id;            // remember which sticker this is, to re-send on move
+  el.dataset.icon = iconId;          // which sticker graphic
+  el.dataset.instance = instanceId;  // which placed instance (unique)
   el.style.position = 'absolute';
   el.style.left = x + 'px';
   el.style.top = y + 'px';
@@ -100,8 +108,8 @@ function placeSticker(scene, emoji, x, y, id) {
   let moving = false;
   let lastSent = 0;             // timestamp throttle for live sends
 
-  // Send the current normalized position, throttled to ~60ms so we update TD
-  // live while dragging without flooding the socket.
+  // Send the current normalized position for THIS instance, throttled to ~60ms
+  // so we update TD live while dragging without flooding the socket.
   function sendPos(px, py, force) {
     const now = performance.now();
     if (!force && now - lastSent < 60) return;
@@ -109,7 +117,7 @@ function placeSticker(scene, emoji, x, y, id) {
     const rect = scene.getBoundingClientRect();
     const nx = px / rect.width;
     const ny = py / rect.height;
-    sendSafe(`${nx.toFixed(4)} ${ny.toFixed(4)} ${id}`);
+    sendSafe(`${nx.toFixed(4)} ${ny.toFixed(4)} ${instanceId} ${iconId}`);
   }
 
   el.addEventListener('pointerdown', (e) => {
@@ -139,12 +147,24 @@ function placeSticker(scene, emoji, x, y, id) {
     const px = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
     const py = Math.max(0, Math.min(e.clientY - rect.top, rect.height));
     sendPos(px, py, true);       // force-send final resting position
-    console.log('moved', emoji, 'to', (px / rect.width).toFixed(4), (py / rect.height).toFixed(4));
   });
 
   el.addEventListener('pointercancel', () => { moving = false; el.style.cursor = 'grab'; });
 
   scene.appendChild(el);
+}
+
+// Replay every placed sticker's current position to TD. Called on (re)connect,
+// since TD clears its sticker slots whenever a fresh 'connected' arrives.
+function resyncStickers() {
+  const scene = document.getElementById('scene');
+  if (!scene) return;
+  const rect = scene.getBoundingClientRect();
+  scene.querySelectorAll('.placed-sticker').forEach((el) => {
+    const nx = parseFloat(el.style.left) / rect.width;
+    const ny = parseFloat(el.style.top) / rect.height;
+    sendSafe(`${nx.toFixed(4)} ${ny.toFixed(4)} ${el.dataset.instance} ${el.dataset.icon}`);
+  });
 }
 
 function playVideo(n) {
@@ -225,6 +245,7 @@ function connect() {
     console.log('connected');
     socket.send('connected');
     startHeartbeat();
+    resyncStickers();            // repopulate TD after it clears on 'connected'
   });
 
   socket.addEventListener('close', () => {
