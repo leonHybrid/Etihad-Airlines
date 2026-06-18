@@ -71,7 +71,8 @@ function init() {
     tray.appendChild(el);
   });
 
-  saveBtn.addEventListener('click', () => sendSafe('save'));
+  // Save no longer sends over the socket — it just opens the email page.
+  saveBtn.addEventListener('click', () => showEmailPage());
   resetBtn.addEventListener('click', () => {
     sendSafe('reset');
     scene.querySelectorAll('.placed-sticker').forEach((el) => el.remove());
@@ -133,6 +134,8 @@ function showEmailPage() {
       msg.textContent = 'Please enter a valid email.';
       return;
     }
+    // The only websocket send for the save flow happens here.
+    sendSafe('save');
     sendSafe(`email ${email}`);
     msg.style.color = '#0a84ff';
     msg.textContent = 'Sent!';
