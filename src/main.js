@@ -60,7 +60,7 @@ function init() {
         const nx = px / rect.width;
         const ny = py / rect.height;
         console.log('dropped', dragged.emoji, 'at', nx.toFixed(4), ny.toFixed(4));
-        placeSticker(scene, dragged.emoji, px, py);
+        placeSticker(scene, dragged.emoji, px, py, dragged.id);
         sendSafe(`${nx.toFixed(4)} ${ny.toFixed(4)} ${dragged.id}`);
       }
       dragged = null;
@@ -71,25 +71,79 @@ function init() {
     tray.appendChild(el);
   });
 
-  // Save no longer sends over the socket — it just opens the email page.
-  saveBtn.addEventListener('click', () => showEmailPage());
+  // Save sends the save signal over the socket, then opens the email page.
+  saveBtn.addEventListener('click', () => {
+    sendSafe('save');
+    showEmailPage();
+  });
   resetBtn.addEventListener('click', () => {
     sendSafe('reset');
     scene.querySelectorAll('.placed-sticker').forEach((el) => el.remove());
   });
 }
 
-function placeSticker(scene, emoji, x, y) {
+function placeSticker(scene, emoji, x, y, id) {
   const el = document.createElement('div');
   el.className = 'placed-sticker';
   el.textContent = emoji;
+  el.dataset.id = id;            // remember which sticker this is, to re-send on move
   el.style.position = 'absolute';
   el.style.left = x + 'px';
   el.style.top = y + 'px';
   el.style.transform = 'translate(-50%, -50%)';
   el.style.fontSize = '32px';
   el.style.userSelect = 'none';
-  el.style.pointerEvents = 'none';
+  el.style.cursor = 'grab';
+  el.style.touchAction = 'none';
+  // pointerEvents stays default (auto) so the placed sticker can be grabbed.
+
+  let moving = false;
+  let lastSent = 0;             // timestamp throttle for live sends
+
+  // Send the current normalized position, throttled to ~60ms so we update TD
+  // live while dragging without flooding the socket.
+  function sendPos(px, py, force) {
+    const now = performance.now();
+    if (!force && now - lastSent < 60) return;
+    lastSent = now;
+    const rect = scene.getBoundingClientRect();
+    const nx = px / rect.width;
+    const ny = py / rect.height;
+    sendSafe(`${nx.toFixed(4)} ${ny.toFixed(4)} ${id}`);
+  }
+
+  el.addEventListener('pointerdown', (e) => {
+    e.preventDefault();
+    e.stopPropagation();         // don't let the scene treat this as a new drop
+    moving = true;
+    el.setPointerCapture(e.pointerId);
+    el.style.cursor = 'grabbing';
+  });
+
+  el.addEventListener('pointermove', (e) => {
+    if (!moving) return;
+    const rect = scene.getBoundingClientRect();
+    // clamp inside the scene so it can't be dragged off-frame
+    const px = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+    const py = Math.max(0, Math.min(e.clientY - rect.top, rect.height));
+    el.style.left = px + 'px';
+    el.style.top = py + 'px';
+    sendPos(px, py, false);      // live update to TD while dragging
+  });
+
+  el.addEventListener('pointerup', (e) => {
+    if (!moving) return;
+    moving = false;
+    el.style.cursor = 'grab';
+    const rect = scene.getBoundingClientRect();
+    const px = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+    const py = Math.max(0, Math.min(e.clientY - rect.top, rect.height));
+    sendPos(px, py, true);       // force-send final resting position
+    console.log('moved', emoji, 'to', (px / rect.width).toFixed(4), (py / rect.height).toFixed(4));
+  });
+
+  el.addEventListener('pointercancel', () => { moving = false; el.style.cursor = 'grab'; });
+
   scene.appendChild(el);
 }
 
@@ -145,8 +199,6 @@ function showEmailPage() {
       msg.textContent = 'Please enter a valid email.';
       return;
     }
-    // The only websocket send for the save flow happens here.
-    sendSafe('save');
     sendSafe(`email ${email}`);
     msg.style.color = '#0a84ff';
     msg.textContent = 'Sent!';
