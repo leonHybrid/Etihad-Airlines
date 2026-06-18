@@ -102,11 +102,21 @@ function playVideo(n) {
 }
 
 function showEmailPage() {
-  player = null;
-  document.body.innerHTML = `
+  // Don't wipe the body — overlay the email page on top so the scene and its
+  // placed stickers stay alive underneath.
+  if (document.getElementById('emailOverlay')) return; // already open
+
+  const overlay = document.createElement('div');
+  overlay.id = 'emailOverlay';
+  overlay.style.position = 'fixed';
+  overlay.style.inset = '0';
+  overlay.style.background = 'rgba(255,255,255,0.97)';
+  overlay.style.zIndex = '1000';
+  overlay.innerHTML = `
     <div style="display:flex; flex-direction:column; align-items:center;
-                justify-content:center; min-height:80vh; gap:20px;
-                font-family:sans-serif; text-align:center; padding:20px;">
+                justify-content:center; min-height:100%; gap:20px;
+                font-family:sans-serif; text-align:center; padding:20px;
+                box-sizing:border-box;">
       <h2>Enter your email</h2>
       <input id="emailInput" type="email" inputmode="email" autocomplete="email"
              placeholder="you@example.com"
@@ -121,10 +131,11 @@ function showEmailPage() {
                 border:none; border-radius:8px; cursor:pointer;">← Back to start</button>
     </div>
   `;
+  document.body.appendChild(overlay);
 
-  const input = document.getElementById('emailInput');
-  const sendBtn = document.getElementById('sendBtn');
-  const msg = document.getElementById('emailMsg');
+  const input = overlay.querySelector('#emailInput');
+  const sendBtn = overlay.querySelector('#sendBtn');
+  const msg = overlay.querySelector('#emailMsg');
 
   function submit() {
     const email = input.value.trim();
@@ -144,7 +155,8 @@ function showEmailPage() {
 
   sendBtn.addEventListener('click', submit);
   input.addEventListener('keydown', (e) => { if (e.key === 'Enter') submit(); });
-  document.getElementById('backBtn').addEventListener('click', init);
+  // Just close the overlay — the scene underneath (with stickers) is still there.
+  overlay.querySelector('#backBtn').addEventListener('click', () => overlay.remove());
 }
 
 // ── WebSocket with heartbeat + auto-reconnect ──────────────────────────────
