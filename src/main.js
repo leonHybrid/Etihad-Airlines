@@ -25,10 +25,6 @@ const videoSources = Array.from({ length: 11 }, (_, i) => `${BASE}videos/${i}.mp
 
 let player = null;
 
-// Prepared ahead of the user's tap so navigator.share() runs inside the
-// gesture (required by Safari).
-let preparedFile = null;
-
 function init() {
   document.body.innerHTML = startPageHTML;
 
@@ -104,91 +100,132 @@ function playVideo(n) {
   player.play().catch((err) => console.warn('play blocked:', err));
 }
 
-// Fetch the video on page load and build a File, so the tap can share instantly.
-function prepareFile(url) {
-  preparedFile = null;
-  const btn = document.getElementById('shareBtn');
-  if (btn) { btn.disabled = true; btn.textContent = 'Preparing…'; }
-
-  fetch(url)
-    .then((res) => res.blob())
-    .then((blob) => {
-      const ext = (url.split('.').pop().split('?')[0] || 'mp4').toLowerCase();
-      const type = blob.type || (ext === 'mov' ? 'video/quicktime' : 'video/mp4');
-      preparedFile = new File([blob], `sticker-video.${ext}`, { type });
-      if (btn) { btn.disabled = false; btn.textContent = '⬇ Save to gallery'; }
-    })
-    .catch((err) => {
-      console.warn('prepare failed:', err);
-      if (btn) { btn.disabled = false; btn.textContent = '⬇ Open video'; }
-    });
-}
-
-// Calls navigator.share() directly inside the tap (no await before it).
-function onShareClick(url) {
-  if (preparedFile && navigator.canShare && navigator.canShare({ files: [preparedFile] })) {
-    navigator.share({ files: [preparedFile], title: 'Your video' })
-      .catch((err) => { if (err && err.name !== 'AbortError') console.warn('share failed:', err); });
-    return;
-  }
-  if (preparedFile) {
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(preparedFile);
-    a.download = preparedFile.name;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(a.href);
-    return;
-  }
-  window.open(url, '_blank');
-}
-
-function showDownloadPage(url) {
+function showEmailPage() {
   player = null;
   document.body.innerHTML = `
     <div style="display:flex; flex-direction:column; align-items:center;
                 justify-content:center; min-height:80vh; gap:20px;
                 font-family:sans-serif; text-align:center; padding:20px;">
-      <h2>Your video is ready</h2>
-      <video src="${url}" controls playsinline muted
-             style="width:100%; max-width:400px; border-radius:8px; background:#000;"></video>
-      <button id="shareBtn" disabled
+      <h2>Enter your email</h2>
+      <input id="emailInput" type="email" inputmode="email" autocomplete="email"
+             placeholder="you@example.com"
+             style="padding:14px 16px; font-size:18px; width:100%; max-width:400px;
+                    border:1px solid #ccc; border-radius:8px; box-sizing:border-box;" />
+      <button id="sendBtn"
          style="padding:14px 28px; font-size:18px; background:#0a84ff; color:#fff;
-                border:none; border-radius:8px; cursor:pointer;">Preparing…</button>
+                border:none; border-radius:8px; cursor:pointer;">Send</button>
+      <p id="emailMsg" style="margin:0; min-height:20px; color:#0a84ff;"></p>
       <button id="backBtn"
          style="padding:12px 24px; font-size:16px; background:#333; color:#fff;
                 border:none; border-radius:8px; cursor:pointer;">← Back to start</button>
     </div>
   `;
-  document.getElementById('shareBtn').addEventListener('click', () => onShareClick(url));
+
+  const input = document.getElementById('emailInput');
+  const sendBtn = document.getElementById('sendBtn');
+  const msg = document.getElementById('emailMsg');
+
+  function submit() {
+    const email = input.value.trim();
+    // simple sanity check before sending
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      msg.style.color = '#d00';
+      msg.textContent = 'Please enter a valid email.';
+      return;
+    }
+    sendSafe(`email ${email}`);
+    msg.style.color = '#0a84ff';
+    msg.textContent = 'Sent!';
+    sendBtn.disabled = true;
+  }
+
+  sendBtn.addEventListener('click', submit);
+  input.addEventListener('keydown', (e) => { if (e.key === 'Enter') submit(); });
   document.getElementById('backBtn').addEventListener('click', init);
-  prepareFile(url);
 }
 
-const socket = new WebSocket('wss://hybrid-websocket-df7faa7008b8.herokuapp.com');
+// ── WebSocket with heartbeat + auto-reconnect ──────────────────────────────
+const WS_URL = 'wss://hybrid-websocket-df7faa7008b8.herokuapp.com';
 
-socket.addEventListener('open', () => { console.log('connected'); socket.send('connected'); });
-socket.addEventListener('close', () => console.log('socket closed'));
-socket.addEventListener('error', (err) => console.warn('socket error:', err));
+let socket = null;
+let heartbeatTimer = null;
+let reconnectTimer = null;
 
-socket.addEventListener('message', (e) => {
-  const data = e.data.trim();
-  if (data.startsWith('https://pub-')) { showDownloadPage(data); return; }
-  const n = parseInt(data, 10);
-  if (String(n) === data && n >= 0 && n <= 10) {
-    playVideo(n);
-  } else {
-    console.log('server said:', e.data);
+function connect() {
+  socket = new WebSocket(WS_URL);
+
+  socket.addEventListener('open', () => {
+    console.log('connected');
+    socket.send('connected');
+    startHeartbeat();
+  });
+
+  socket.addEventListener('close', () => {
+    console.log('socket closed — reconnecting in 2s');
+    stopHeartbeat();
+    scheduleReconnect();
+  });
+
+  socket.addEventListener('error', (err) => {
+    console.warn('socket error:', err);
+    // an error is normally followed by a close event, which handles reconnect
+  });
+
+  socket.addEventListener('message', (e) => {
+    const data = e.data.trim();
+    if (data === 'ping' || data === 'pong') return; // ignore heartbeat echoes
+    if (data.startsWith('https://pub-')) { showEmailPage(); return; }
+    const n = parseInt(data, 10);
+    if (String(n) === data && n >= 0 && n <= 10) {
+      playVideo(n);
+    } else {
+      console.log('server said:', e.data);
+    }
+  });
+}
+
+// Heroku closes any connection idle for 55s. Push a tiny message every 30s
+// to keep the router from treating it as idle.
+function startHeartbeat() {
+  stopHeartbeat();
+  heartbeatTimer = setInterval(() => {
+    if (socket && socket.readyState === WebSocket.OPEN) {
+      socket.send('ping');
+    }
+  }, 30000);
+}
+
+function stopHeartbeat() {
+  if (heartbeatTimer) { clearInterval(heartbeatTimer); heartbeatTimer = null; }
+}
+
+function scheduleReconnect() {
+  if (reconnectTimer) return; // already scheduled
+  reconnectTimer = setTimeout(() => {
+    reconnectTimer = null;
+    connect();
+  }, 2000);
+}
+
+// When the phone wakes / the tab comes back to the foreground, the socket has
+// often died silently. Reconnect if it's not open.
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') {
+    if (!socket || socket.readyState !== WebSocket.OPEN) {
+      stopHeartbeat();
+      if (reconnectTimer) { clearTimeout(reconnectTimer); reconnectTimer = null; }
+      connect();
+    }
   }
 });
 
 function sendSafe(msg) {
-  if (socket.readyState === WebSocket.OPEN) {
+  if (socket && socket.readyState === WebSocket.OPEN) {
     socket.send(msg);
   } else {
     console.warn('socket not open, dropped message:', msg);
   }
 }
 
+connect();
 init();
