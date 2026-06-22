@@ -75,7 +75,6 @@ function markCompleted() {
 
 // ── Page 1: sticker builder ─────────────────────────────────────────────────
 function renderStickerPage() {
-  document.body.style.setProperty('--page-bg', `url('${CONFIG.page1Bg}')`);
   app.innerHTML = `
     <div class="page page-sticker" style="background-image:url('${CONFIG.page1Bg}')">
       <div class="location-label" id="locationLabel">
@@ -274,11 +273,8 @@ function setupTrayNav() {
 // ── Page 2: thank you — single image + one button overlay ───────────────────
 function renderThanksPage() {
   player = null;
-  document.body.style.setProperty('--page-bg', `url('${CONFIG.page2Bg}')`);
   app.innerHTML = `
-    <div class="page page-thanks" style="background-image:url('${CONFIG.page2Bg}')">`;
-      
-    </div>
+    <div class="page page-thanks" style="background-image:url('${CONFIG.page2Bg}')"></div>
   `;
 }
 

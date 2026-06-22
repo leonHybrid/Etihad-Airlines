@@ -67,7 +67,7 @@ html, body { margin: 0; height: 100%; }
 body {
   font-family: var(--font);
   color: #fff;
-  background: #0f1a22 var(--page-bg, none) top center/cover no-repeat;
+  background: #0f1a22;
   display: grid;
   place-items: center;
   min-height: 100dvh;
