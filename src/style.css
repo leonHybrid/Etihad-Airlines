@@ -1,18 +1,309 @@
-.download-btn {
+/* ──────────────────────────────────────────────────────────────────────────
+   Etihad Vibe — interactive sticker installation
+
+   Each page's artwork is ONE baked background image. We only overlay the
+   interactive parts on top:
+     • Page 1 (page1Bg = clouds + logo + PARIS): video scene, sticker panel, buttons
+     • Page 2 (page2Bg = the whole thank-you art): just the download button
+
+   To stay aligned to the baked art at any screen size, the whole experience is a
+   single fixed-aspect STAGE (#app) that scales to fit the viewport. All overlay
+   positions are % of the stage and all overlay sizes use container units (cqw),
+   so the interactive layer scales in lockstep with the background image.
+
+   Nudge the POSITION VARIABLES below to line overlays up with your exact artwork.
+   ────────────────────────────────────────────────────────────────────────── */
+
+@font-face {
+  font-family: 'EtihadAltis';
+  src: url('/fonts/EtihadAltis-Medium_V3.ttf') format('truetype');
+  font-weight: 500;
+  font-display: swap;
+}
+
+:root {
+  /* Design aspect of your exported artwork (width / height). iPhone 16/17 Pro. */
+  --design-w: 1206;
+  --design-h: 2622;
+
+  /* ── Page 1 overlay positions (all % of the stage) ─────────────────────── */
+  --scene-top: 28%;     /* the video / image area */
+  --scene-left: 5%;
+  --scene-width: 90%;
+  --scene-height: 38%;
+
+  --location-top: 22%;  /* city pin label — sits below the baked Etihad logo */
+
+  --panel-top: 68%;     /* the "Select your stickers!" panel */
+  --panel-side: 4%;
+
+  --actions-bottom: 2.5%; /* Reset / Done */
+  --actions-side: 5%;
+
+  /* ── Page 2 overlay position ───────────────────────────────────────────── */
+  --dl-top: 58%;        /* download button — move to the empty band in your art */
+  --dl-side: 14%;
+
+  /* ── Brand colors (from the mockup) ────────────────────────────────────── */
+  --reset: #f5a623;
+  --reset-dark: #e6951a;
+  --done: #e8634a;
+  --done-dark: #d8503a;
+
+  --panel-bg: rgba(228, 237, 242, 0.5);
+  --panel-border: rgba(255, 255, 255, 0.45);
+  --panel-heading: #2f444d;
+  --tile-bg: #ffffff;
+
+  --placed: 15cqw;      /* on-stage size of a dropped sticker */
+
+  --font: 'EtihadAltis', "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html, body { margin: 0; height: 100%; }
+
+body {
+  font-family: var(--font);
+  color: #fff;
+  background: #0f1a22;               /* letterbox fill around the stage */
+  display: grid;
+  place-items: center;
+  min-height: 100dvh;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+/* The fixed-aspect stage everything renders into. */
+#app {
+  position: relative;
+  width: min(100vw, calc(100dvh * var(--design-w) / var(--design-h)));
+  aspect-ratio: var(--design-w) / var(--design-h);
+  container-type: size;             /* enables cqw/cqh for children */
+  overflow: hidden;
+  background: #0f1a22;
+  box-shadow: 0 0 60px rgba(0, 0, 0, 0.45);
+}
+
+/* One baked image per page, filling the stage exactly (no crop, aspect matches). */
+.page {
+  position: absolute;
+  inset: 0;
+  background-color: #0f1a22;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+/* ── Location label (top of page 1, driven by websocket) ──────────────────── */
+.location-label {
+  position: absolute;
+  top: var(--location-top);
+  left: 50%;
+  transform: translateX(-50%);
   display: inline-flex;
   align-items: center;
+  gap: 2cqw;
+  white-space: nowrap;
+}
+.location-label img {
+  width: 6cqw;
+  height: auto;
+  pointer-events: none;
+}
+.location-label span {
+  font-family: var(--font);
+  font-weight: 500;
+  font-size: 6.5cqw;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #fff;
+  text-shadow: 0 1px 6px rgba(0,0,0,0.4);
+}
+
+/* ── Page 1: the websocket-driven video (stickers drop on top) ─────────────── */
+.scene {
+  position: absolute;
+  top: var(--scene-top);
+  left: var(--scene-left);
+  width: var(--scene-width);
+  height: var(--scene-height);
+  border-radius: 4cqw;
+  overflow: hidden;
+  background: #000;
+  box-shadow: 0 2cqw 6cqw rgba(0, 0, 0, 0.35);
+}
+.scene video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.placed-sticker {
+  position: absolute;
+  width: var(--placed);
+  height: var(--placed);
+  transform: translate(-50%, -50%);
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  filter: drop-shadow(0 0.8cqw 1.4cqw rgba(0, 0, 0, 0.35));
+  will-change: left, top;
+}
+.placed-sticker:active { cursor: grabbing; }
+.placed-sticker img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  -webkit-user-drag: none;
+}
+
+/* ── Sticker panel ────────────────────────────────────────────────────────── */
+.sticker-panel {
+  position: absolute;
+  top: var(--panel-top);
+  left: var(--panel-side);
+  right: var(--panel-side);
+  padding: 4cqw 3.5cqw 3.5cqw;
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 6cqw;
+  backdrop-filter: blur(14px) saturate(120%);
+  -webkit-backdrop-filter: blur(14px) saturate(120%);
+  box-shadow: 0 2cqw 6cqw rgba(0, 0, 0, 0.18);
+}
+.sticker-panel h2 {
+  margin: 0 0 3cqw;
+  text-align: center;
+  font-size: 5cqw;
+  font-weight: 500;
+  font-family: var(--font);
+  color: var(--panel-heading);
+}
+
+.tray-row { display: flex; align-items: center; gap: 2cqw; }
+
+.tray {
+  display: flex;
+  gap: 3cqw;
+  flex: 1;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  scroll-snap-type: x proximity;
+  padding: 1cqw;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.tray::-webkit-scrollbar { display: none; }
+
+.sticker {
+  flex: 0 0 auto;
+  width: 16cqw;
+  height: 16cqw;
+  background: var(--tile-bg);
+  border-radius: 4cqw;
+  display: grid;
+  place-items: center;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  scroll-snap-align: start;
+  box-shadow: 0 1cqw 2.5cqw rgba(0, 0, 0, 0.12);
+  transition: transform 0.12s ease;
+}
+.sticker:active { cursor: grabbing; transform: scale(0.94); }
+.sticker img {
+  width: 72%;
+  height: 72%;
+  object-fit: contain;
+  pointer-events: none;
+  -webkit-user-drag: none;
+}
+
+.tray-arrow {
+  flex: none;
+  width: 8.5cqw;
+  height: 8.5cqw;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.28);
+  color: #fff;
+  font-size: 5cqw;
+  line-height: 1;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: background 0.15s ease, opacity 0.15s ease;
+}
+.tray-arrow:hover { background: rgba(0, 0, 0, 0.42); }
+.tray-arrow:disabled { opacity: 0.3; cursor: default; }
+
+.dots { display: flex; justify-content: center; gap: 1.8cqw; margin-top: 3cqw; }
+.dot {
+  width: 1.8cqw;
+  height: 1.8cqw;
+  border-radius: 50%;
+  background: rgba(120, 140, 150, 0.5);
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+.dot.active { background: var(--done); transform: scale(1.25); }
+
+/* ── Action buttons ───────────────────────────────────────────────────────── */
+.actions {
+  position: absolute;
+  left: var(--actions-side);
+  right: var(--actions-side);
+  bottom: var(--actions-bottom);
+  display: flex;
+  gap: 3.5cqw;
+}
+.btn {
+  flex: 1;
+  border: none;
+  border-radius: 4cqw;
+  padding: 4.2cqw 4cqw;
+  font-family: var(--font);
+  font-size: 4.6cqw;
+  font-weight: 500;
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 1.5cqw 4cqw rgba(0, 0, 0, 0.22);
+  transition: transform 0.12s ease, filter 0.15s ease;
+}
+.btn:active { transform: translateY(1px); }
+.btn-reset { background: linear-gradient(180deg, var(--reset), var(--reset-dark)); }
+.btn-done  { background: linear-gradient(180deg, var(--done), var(--done-dark)); }
+.btn:hover { filter: brightness(1.04); }
+
+/* ── Page 2: thank you — single image + one button overlay ─────────────────── */
+.download-btn {
+  position: absolute;
+  top: var(--dl-top);
+  left: var(--dl-side);
+  right: var(--dl-side);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   gap: 10px;
   background: #ffffff;
   color: #0f0f0f;
   text-decoration: none;
-  font-size: 16px;
+  font-size: 4.2cqw;
   font-weight: 600;
-  padding: 14px 32px;
+  padding: 3.6cqw 6cqw;
   border-radius: 50px;
   transition: opacity 0.2s;
-  width: 100%;
-  justify-content: center;
+  box-shadow: 0 1.5cqw 4cqw rgba(0, 0, 0, 0.25);
 }
-
 .download-btn:hover { opacity: 0.85; }
 .download-btn:active { opacity: 0.7; }
+
+/* ── Accessibility / polish ───────────────────────────────────────────────── */
+:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+
+@media (prefers-reduced-motion: reduce) {
+  * { scroll-behavior: auto !important; transition: none !important; }
+}
