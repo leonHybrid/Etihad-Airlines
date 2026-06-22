@@ -86,11 +86,13 @@ body {
   z-index: 1;
 }
 
-/* Overlay container — background is on body so it always fills the full viewport */
+/* Background on .page fills the stage; body background fills the letterbox on desktop */
 .page {
   position: absolute;
   inset: 0;
-  background: transparent;
+  background-position: top center;
+  background-size: cover;
+  background-repeat: no-repeat;
 }
 
 /* ── Location label (top of page 1, driven by websocket) ──────────────────── */
