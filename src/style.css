@@ -67,7 +67,7 @@ html, body { margin: 0; height: 100%; }
 body {
   font-family: var(--font);
   color: #fff;
-  background: #0f1a22;               /* letterbox fill around the stage */
+  background: #0f1a22 var(--page-bg, none) top center/cover no-repeat fixed;
   display: grid;
   place-items: center;
   min-height: 100dvh;
@@ -75,24 +75,22 @@ body {
   overflow: hidden;
 }
 
-/* Full-screen stage — background image covers via background-size:cover */
+/* Fixed-aspect stage — keeps overlay % positions correct on any screen */
 #app {
   position: relative;
-  width: 100vw;
-  height: 100dvh;
+  width: min(100vw, calc(100dvh * var(--design-w) / var(--design-h)));
+  aspect-ratio: var(--design-w) / var(--design-h);
   container-type: size;
   overflow: hidden;
-  background: #0f1a22;
+  background: transparent;
+  z-index: 1;
 }
 
-/* One baked image per page, filling the stage exactly (no crop, aspect matches). */
+/* Overlay container — background is on body so it always fills the full viewport */
 .page {
   position: absolute;
   inset: 0;
-  background-color: #0f1a22;
-  background-position: center;
-  background-size: cover;
-  background-repeat: no-repeat;
+  background: transparent;
 }
 
 /* ── Location label (top of page 1, driven by websocket) ──────────────────── */

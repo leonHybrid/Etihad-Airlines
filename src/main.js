@@ -1,4 +1,4 @@
-import './style.css';
+﻿import './style.css';
 
 // import.meta.env.BASE_URL resolves asset paths correctly whether the site is
 // served from the domain root or a /Etihad-Airlines/ subpath on GitHub Pages.
@@ -75,8 +75,9 @@ function markCompleted() {
 
 // ── Page 1: sticker builder ─────────────────────────────────────────────────
 function renderStickerPage() {
+  document.body.style.setProperty('--page-bg', `url('${CONFIG.page1Bg}')`);
   app.innerHTML = `
-    <div class="page page-sticker" style="background-image:url('${CONFIG.page1Bg}')">
+    <div class="page page-sticker">
       <div class="location-label" id="locationLabel">
         <img src="${CONFIG.locationIcon}" alt="">
         <span id="locationText">${CONFIG.cities[0]}</span>
@@ -273,8 +274,9 @@ function setupTrayNav() {
 // ── Page 2: thank you — single image + one button overlay ───────────────────
 function renderThanksPage() {
   player = null;
+  document.body.style.setProperty('--page-bg', `url('${CONFIG.page2Bg}')`);
   app.innerHTML = `
-    <div class="page page-thanks" style="background-image:url('${CONFIG.page2Bg}')">
+    <div class="page page-thanks">
       
     </div>
   `;
