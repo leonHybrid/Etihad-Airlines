@@ -114,12 +114,25 @@ function renderStickerPage() {
 
     el.addEventListener('pointerdown', (e) => {
       e.preventDefault();
-      dragged = { icon: i, src: sticker.src, alt: sticker.alt };
+      const ghost = document.createElement('div');
+      ghost.className = 'drag-ghost';
+      ghost.innerHTML = `<img src="${sticker.src}" alt="${sticker.alt}" draggable="false">`;
+      ghost.style.left = e.clientX + 'px';
+      ghost.style.top = e.clientY + 'px';
+      document.body.appendChild(ghost);
+      dragged = { icon: i, src: sticker.src, alt: sticker.alt, ghost };
       el.setPointerCapture(e.pointerId);
+    });
+
+    el.addEventListener('pointermove', (e) => {
+      if (!dragged?.ghost) return;
+      dragged.ghost.style.left = e.clientX + 'px';
+      dragged.ghost.style.top = e.clientY + 'px';
     });
 
     el.addEventListener('pointerup', (e) => {
       if (!dragged) return;
+      dragged.ghost?.remove();
       const rect = scene.getBoundingClientRect();
       const px = e.clientX - rect.left;
       const py = e.clientY - rect.top;
@@ -134,7 +147,7 @@ function renderStickerPage() {
       dragged = null;
     });
 
-    el.addEventListener('pointercancel', () => { dragged = null; });
+    el.addEventListener('pointercancel', () => { dragged?.ghost?.remove(); dragged = null; });
 
     tray.appendChild(el);
   });
