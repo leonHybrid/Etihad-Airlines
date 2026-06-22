@@ -22,15 +22,15 @@ const CONFIG = {
   // Add/remove freely; the arrows and dots adapt. Animated .gif works.
   stickers: [
     { src: `${BASE}stickers/sun.gif`,     alt: 'Sun' },
-    { src: `${BASE}stickers/wave.gif`,    alt: 'Wave' },
-    { src: `${BASE}stickers/cloud.gif`,   alt: 'Cloud' },
-    { src: `${BASE}stickers/moon.gif`,    alt: 'Moon' },
-    { src: `${BASE}stickers/parasol.gif`, alt: 'Beach umbrella' },
-    { src: `${BASE}stickers/star.gif`,    alt: 'Star' },
-    { src: `${BASE}stickers/heart.gif`,   alt: 'Heart' },
-    { src: `${BASE}stickers/diamond.gif`, alt: 'Diamond' },
-    { src: `${BASE}stickers/snow.gif`,    alt: 'Snowflake' },
-    { src: `${BASE}stickers/sparkle.gif`, alt: 'Sparkle' },
+    { src: `${BASE}stickers/wave.webp`,    alt: 'Wave' },
+    { src: `${BASE}stickers/cloud.webp`,   alt: 'Cloud' },
+    { src: `${BASE}stickers/moon.webp`,    alt: 'Moon' },
+    { src: `${BASE}stickers/parasol.webp`, alt: 'Beach umbrella' },
+    { src: `${BASE}stickers/star.webp`,    alt: 'Star' },
+    { src: `${BASE}stickers/heart.webp`,   alt: 'Heart' },
+    { src: `${BASE}stickers/diamond.webp`, alt: 'Diamond' },
+    { src: `${BASE}stickers/snow.webp`,    alt: 'Snowflake' },
+    { src: `${BASE}stickers/sparkle.webp`, alt: 'Sparkle' },
   ],
 
   appUrl: 'https://example.com/app', // download button target on page 2
