@@ -135,7 +135,6 @@ function renderStickerPage() {
 
         <div class="actions">
           <button id="resetBtn" class="btn btn-reset">Reset</button>
-          <button id="doneBtn"  class="btn btn-done">Done</button>
         </div>
       </div>
     </div>
@@ -193,12 +192,6 @@ function renderStickerPage() {
   });
 
   setupTrayNav();
-
-  document.getElementById('doneBtn').addEventListener('click', () => {
-    sendSafe('save');
-    markCompleted();
-    renderThanksPage();
-  });
 
   document.getElementById('resetBtn').addEventListener('click', () => {
     sendSafe('reset');
