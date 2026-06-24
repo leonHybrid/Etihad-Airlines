@@ -27,6 +27,12 @@ const CONFIG = {
     { src: `${BASE}stickers/GATE.webp`,    alt: 'Gate' },
     { src: `${BASE}stickers/LANTERN.webp`, alt: 'Lantern' },
     { src: `${BASE}stickers/SUN.webp`,    alt: 'Sun' },
+       { src: `${BASE}stickers/BOBA1.webp`,     alt: 'Boba' },
+    { src: `${BASE}stickers/CLOUD1.webp`,    alt: 'Cloud' },
+    { src: `${BASE}stickers/DUMPLING1.webp`,   alt: 'Dumpling' },
+    { src: `${BASE}stickers/GATE1.webp`,    alt: 'Gate' },
+    { src: `${BASE}stickers/LANTERN1.webp`, alt: 'Lantern' },
+    { src: `${BASE}stickers/SUN1.webp`,    alt: 'Sun' },
   ],
 
   appUrl: 'https://example.com/app', // download button target on page 2
