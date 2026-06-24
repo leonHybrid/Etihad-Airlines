@@ -41,6 +41,10 @@ const CONFIG = {
   cities: ['New York', 'Paris', 'London', 'Tokyo', 'Phuket', 'Mumbai'],
 
   locationIcon: `${BASE}img/Spot.png`,
+
+  // Etihad VIBE logo, overlaid as its own element (a fixed distance from the
+  // top) so it stays put across devices. Remove it from page1Bg/page2Bg.
+  logo: `${BASE}img/logo.png`,
 };
 
 // One-visit gate. Bump this string to re-open the experience for everyone.
@@ -108,6 +112,7 @@ const thumbOf = (src) => src.replace('/stickers/', '/stickers/thumbs/');
 function renderStickerPage() {
   app.innerHTML = `
     <div class="page page-sticker" style="background-image:url('${CONFIG.page1Bg}')">
+      <img class="brand-logo" src="${CONFIG.logo}" alt="Etihad VIBE" draggable="false">
       <div class="location-label" id="locationLabel">
         <img src="${CONFIG.locationIcon}" alt="">
         <span id="locationText">${CONFIG.cities[0]}</span>
@@ -130,7 +135,6 @@ function renderStickerPage() {
 
         <div class="actions">
           <button id="resetBtn" class="btn btn-reset">Reset</button>
-          <button id="doneBtn"  class="btn btn-done">Done</button>
         </div>
       </div>
     </div>
@@ -188,12 +192,6 @@ function renderStickerPage() {
   });
 
   setupTrayNav();
-
-  document.getElementById('doneBtn').addEventListener('click', () => {
-    sendSafe('save');
-    markCompleted();
-    renderThanksPage();
-  });
 
   document.getElementById('resetBtn').addEventListener('click', () => {
     sendSafe('reset');
@@ -308,7 +306,9 @@ function setupTrayNav() {
 // ── Page 2: thank you — single image + one button overlay ───────────────────
 function renderThanksPage() {
   app.innerHTML = `
-    <div class="page page-thanks" style="background-image:url('${CONFIG.page2Bg}')"></div>
+    <div class="page page-thanks" style="background-image:url('${CONFIG.page2Bg}')">
+      <img class="brand-logo" src="${CONFIG.logo}" alt="Etihad VIBE" draggable="false">
+    </div>
   `;
 }
 

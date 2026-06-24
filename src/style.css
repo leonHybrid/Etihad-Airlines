@@ -20,6 +20,12 @@
   font-weight: 500;
   font-display: swap;
 }
+@font-face {
+  font-family: 'EtihadAltis';
+  src: url('/fonts/EtihadAltis-Light_V3.ttf') format('truetype');
+  font-weight: 300;
+  font-display: swap;
+}
 
 :root {
   /* Design aspect of your exported artwork (width / height). iPhone 16/17 Pro. */
@@ -29,8 +35,9 @@
   /* ── Page 1 overlay positions (all % of the stage) ─────────────────────── */
   /* The lower region (scene + panel + buttons) is one flex column anchored
      between --scene-top and --actions-bottom; the scene flexes to fill. */
+  --logo-top: 60px;     /* Etihad VIBE logo — fixed px from the top edge */
   --scene-top: 26%;     /* where the scene/panel/buttons column begins */
-  --location-top: 22%;  /* city pin label — sits below the baked Etihad logo */
+  --location-top: 18%;  /* city pin label — sits below the logo */
   --panel-side: 4%;     /* left/right inset of the lower column */
   --actions-bottom: 2.5%; /* gap from Reset/Done to the bottom edge */
   --tray-gap: 3cqw;     /* gap between sticker tiles (4 always fit per view) */
@@ -45,10 +52,10 @@
   --done: #e8634a;
   --done-dark: #d8503a;
 
-  --panel-bg: rgba(228, 237, 242, 0.5);
-  --panel-border: rgba(255, 255, 255, 0.45);
-  --panel-heading: #2f444d;
-  --tile-bg: #ffffff;
+  --panel-bg: rgba(18, 32, 41, 0.45);
+  --panel-border: rgba(255, 255, 255, 0.12);
+  --panel-heading: #ffffff;
+  --tile-bg: #c9d2d8;
 
   --placed: 15cqw;      /* on-stage size of a dropped sticker */
 
@@ -100,6 +107,19 @@ body {
   background-position: top center;
   background-size: cover;
   background-repeat: no-repeat;
+}
+
+/* ── Brand logo overlay (same fixed distance from the top on every device) ── */
+.brand-logo {
+  position: absolute;
+  top: var(--logo-top);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 42cqw;
+  max-width: 240px;
+  height: auto;
+  pointer-events: none;
+  z-index: 3;
 }
 
 /* ── Location label (top of page 1, driven by websocket) ──────────────────── */
@@ -189,8 +209,8 @@ body {
   background: var(--panel-bg);
   border: 1px solid var(--panel-border);
   border-radius: 6cqw;
-  backdrop-filter: blur(14px) saturate(120%);
-  -webkit-backdrop-filter: blur(14px) saturate(120%);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   box-shadow: 0 2cqw 6cqw rgba(0, 0, 0, 0.18);
 }
 .sticker-panel h2 {
@@ -198,9 +218,9 @@ body {
   text-align: center;
   font-size: 4cqw;
   line-height: 1.3;
-  font-weight: 500;
+  font-weight: 300;
   font-family: var(--font);
-  color: #fff;
+  color: var(--panel-heading);
 }
 
 .tray-row { display: flex; align-items: center; gap: 2cqw; }
@@ -277,10 +297,11 @@ body {
 .actions {
   flex: 0 0 auto;
   display: flex;
+  justify-content: center;
   gap: 3.5cqw;
 }
 .btn {
-  flex: 1;
+  flex: 0 1 50%;
   border: none;
   border-radius: 4cqw;
   padding: 4.2cqw 4cqw;
