@@ -84,6 +84,18 @@ body {
   overflow: hidden;
   background: transparent;
   z-index: 1;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* On phones, fill the whole viewport so there are no letterbox bars on the
+   sides/edges. The artwork covers from the top (background-position: top), so
+   the logo always stays visible and any excess is cropped off the bottom. */
+@media (max-width: 820px) {
+  #app {
+    width: 100vw;
+    height: 100dvh;
+    aspect-ratio: auto;
+  }
 }
 
 /* Background on .page fills the stage; body background fills the letterbox on desktop */

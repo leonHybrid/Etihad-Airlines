@@ -21,16 +21,12 @@ const CONFIG = {
   // Red area: the side-scroll tray. ARRAY ORDER = icon id sent over the socket.
   // Add/remove freely; the arrows and dots adapt. Animated .gif works.
   stickers: [
-    { src: `${BASE}stickers/sun.gif`,     alt: 'Sun' },
-    { src: `${BASE}stickers/wave.webp`,    alt: 'Wave' },
-    { src: `${BASE}stickers/cloud.webp`,   alt: 'Cloud' },
-    { src: `${BASE}stickers/moon.webp`,    alt: 'Moon' },
-    { src: `${BASE}stickers/parasol.webp`, alt: 'Beach umbrella' },
-    { src: `${BASE}stickers/star.webp`,    alt: 'Star' },
-    { src: `${BASE}stickers/heart.webp`,   alt: 'Heart' },
-    { src: `${BASE}stickers/diamond.webp`, alt: 'Diamond' },
-    { src: `${BASE}stickers/snow.webp`,    alt: 'Snowflake' },
-    { src: `${BASE}stickers/sparkle.webp`, alt: 'Sparkle' },
+    { src: `${BASE}stickers/BOBA.webp`,     alt: 'Boba' },
+    { src: `${BASE}stickers/CLOUD.webp`,    alt: 'Cloud' },
+    { src: `${BASE}stickers/DUMPLING.webp`,   alt: 'Dumpling' },
+    { src: `${BASE}stickers/GATE.webp`,    alt: 'Gate' },
+    { src: `${BASE}stickers/LANTERN.webp`, alt: 'Lantern' },
+    { src: `${BASE}stickers/SUN.webp`,    alt: 'Sun' },
   ],
 
   appUrl: 'https://example.com/app', // download button target on page 2
