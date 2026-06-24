@@ -29,8 +29,9 @@
   /* ── Page 1 overlay positions (all % of the stage) ─────────────────────── */
   /* The lower region (scene + panel + buttons) is one flex column anchored
      between --scene-top and --actions-bottom; the scene flexes to fill. */
+  --logo-top: 60px;     /* Etihad VIBE logo — fixed px from the top edge */
   --scene-top: 26%;     /* where the scene/panel/buttons column begins */
-  --location-top: 22%;  /* city pin label — sits below the baked Etihad logo */
+  --location-top: 18%;  /* city pin label — sits below the logo */
   --panel-side: 4%;     /* left/right inset of the lower column */
   --actions-bottom: 2.5%; /* gap from Reset/Done to the bottom edge */
   --tray-gap: 3cqw;     /* gap between sticker tiles (4 always fit per view) */
@@ -100,6 +101,19 @@ body {
   background-position: top center;
   background-size: cover;
   background-repeat: no-repeat;
+}
+
+/* ── Brand logo overlay (same fixed distance from the top on every device) ── */
+.brand-logo {
+  position: absolute;
+  top: var(--logo-top);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 42cqw;
+  max-width: 240px;
+  height: auto;
+  pointer-events: none;
+  z-index: 3;
 }
 
 /* ── Location label (top of page 1, driven by websocket) ──────────────────── */
