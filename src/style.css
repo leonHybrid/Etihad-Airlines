@@ -297,10 +297,11 @@ body {
 .actions {
   flex: 0 0 auto;
   display: flex;
+  justify-content: center;
   gap: 3.5cqw;
 }
 .btn {
-  flex: 1;
+  flex: 0 1 50%;
   border: none;
   border-radius: 4cqw;
   padding: 4.2cqw 4cqw;
