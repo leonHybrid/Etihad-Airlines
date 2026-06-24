@@ -101,6 +101,9 @@ function markCompleted() {
   try { localStorage.setItem(STORAGE_KEY, 'true'); } catch { /* private mode */ }
 }
 
+// Map a full sticker path to its static tray thumbnail in /stickers/thumbs/.
+const thumbOf = (src) => src.replace('/stickers/', '/stickers/thumbs/');
+
 // ── Page 1: sticker builder ─────────────────────────────────────────────────
 function renderStickerPage() {
   app.innerHTML = `
@@ -139,7 +142,10 @@ function renderStickerPage() {
   CONFIG.stickers.forEach((sticker, i) => {
     const el = document.createElement('div');
     el.className = 'sticker';
-    el.innerHTML = `<img src="${sticker.src}" alt="${sticker.alt}" draggable="false">`;
+    // Tray uses a tiny static thumbnail (first frame). The heavy animated webp
+    // is only loaded for the drag ghost and the placed sticker, so the tray
+    // doesn't animate a dozen large files at once.
+    el.innerHTML = `<img src="${thumbOf(sticker.src)}" alt="${sticker.alt}" draggable="false" loading="lazy">`;
 
     el.addEventListener('pointerdown', (e) => {
       e.preventDefault();
@@ -269,7 +275,7 @@ function setupTrayNav() {
   const next = document.getElementById('trayNext');
   const dots = document.getElementById('dots');
 
-  const pageWidth = () => tray.clientWidth * 0.85;
+  const pageWidth = () => tray.clientWidth; // one full page = the 4 visible columns
   prev.addEventListener('click', () => tray.scrollBy({ left: -pageWidth() }));
   next.addEventListener('click', () => tray.scrollBy({ left: pageWidth() }));
 

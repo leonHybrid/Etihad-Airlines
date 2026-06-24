@@ -33,6 +33,7 @@
   --location-top: 22%;  /* city pin label — sits below the baked Etihad logo */
   --panel-side: 4%;     /* left/right inset of the lower column */
   --actions-bottom: 2.5%; /* gap from Reset/Done to the bottom edge */
+  --tray-gap: 3cqw;     /* gap between sticker tiles (4 always fit per view) */
 
   /* ── Page 2 overlay position ───────────────────────────────────────────── */
   --dl-top: 58%;        /* download button — move to the empty band in your art */
@@ -207,23 +208,23 @@ body {
 .tray {
   display: grid;
   grid-auto-flow: column;
-  grid-template-rows: repeat(2, auto);
-  grid-auto-columns: 16cqw;
-  gap: 3cqw;
+  grid-template-rows: repeat(2, 1fr);
+  /* Always show exactly 4 columns: each is a quarter of the visible width
+     minus the 3 gaps between them. The tiles scale with the screen. */
+  grid-auto-columns: calc((100% - 3 * var(--tray-gap)) / 4);
+  gap: var(--tray-gap);
   flex: 1;
   overflow-x: auto;
   scroll-behavior: smooth;
-  scroll-snap-type: x proximity;
-  padding: 1cqw;
+  scroll-snap-type: x mandatory;
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
 .tray::-webkit-scrollbar { display: none; }
 
 .sticker {
-  flex: 0 0 auto;
-  width: 16cqw;
-  height: 16cqw;
+  width: 100%;
+  aspect-ratio: 1;
   background: var(--tile-bg);
   border-radius: 4cqw;
   display: grid;
