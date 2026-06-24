@@ -27,18 +27,12 @@
   --design-h: 2622;
 
   /* ── Page 1 overlay positions (all % of the stage) ─────────────────────── */
-  --scene-top: 26%;     /* the video / image area */
-  --scene-left: 5%;
-  --scene-width: 90%;
-  --scene-height: 30%;
-
+  /* The lower region (scene + panel + buttons) is one flex column anchored
+     between --scene-top and --actions-bottom; the scene flexes to fill. */
+  --scene-top: 26%;     /* where the scene/panel/buttons column begins */
   --location-top: 22%;  /* city pin label — sits below the baked Etihad logo */
-
-  --panel-top: 59%;     /* the "Select your stickers!" panel */
-  --panel-side: 4%;
-
-  --actions-bottom: 2.5%; /* Reset / Done */
-  --actions-side: 5%;
+  --panel-side: 4%;     /* left/right inset of the lower column */
+  --actions-bottom: 2.5%; /* gap from Reset/Done to the bottom edge */
 
   /* ── Page 2 overlay position ───────────────────────────────────────────── */
   --dl-top: 58%;        /* download button — move to the empty band in your art */
@@ -133,23 +127,37 @@ body {
   text-shadow: 0 1px 6px rgba(0,0,0,0.4);
 }
 
-/* ── Page 1: the websocket-driven video (stickers drop on top) ─────────────── */
-.scene {
+/* ── Page 1 lower region ─────────────────────────────────────────────────────
+   scene + sticker panel + buttons live in one bottom-anchored flex column. The
+   scene flexes to fill leftover height while the panel and buttons keep their
+   intrinsic size, so the buttons never overlap the stickers on any phone. */
+.lower {
   position: absolute;
   top: var(--scene-top);
-  left: var(--scene-left);
-  width: var(--scene-width);
-  height: var(--scene-height);
+  left: var(--panel-side);
+  right: var(--panel-side);
+  bottom: var(--actions-bottom);
+  display: flex;
+  flex-direction: column;
+  gap: 3cqw;
+}
+
+/* Placeholder image area (no video) — shrinks first when height is tight. */
+.scene {
+  flex: 1 1 auto;
+  min-height: 0;
   border-radius: 4cqw;
   overflow: hidden;
-  background: #000;
+  background: #16242e;
   box-shadow: 0 2cqw 6cqw rgba(0, 0, 0, 0.35);
 }
-.scene video {
+.scene-placeholder {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
+  pointer-events: none;
+  -webkit-user-drag: none;
 }
 
 .placed-sticker {
@@ -174,10 +182,7 @@ body {
 
 /* ── Sticker panel ────────────────────────────────────────────────────────── */
 .sticker-panel {
-  position: absolute;
-  top: var(--panel-top);
-  left: var(--panel-side);
-  right: var(--panel-side);
+  flex: 0 0 auto;
   padding: 4cqw 3.5cqw 3.5cqw;
   background: var(--panel-bg);
   border: 1px solid var(--panel-border);
@@ -268,10 +273,7 @@ body {
 
 /* ── Action buttons ───────────────────────────────────────────────────────── */
 .actions {
-  position: absolute;
-  left: var(--actions-side);
-  right: var(--actions-side);
-  bottom: var(--actions-bottom);
+  flex: 0 0 auto;
   display: flex;
   gap: 3.5cqw;
 }

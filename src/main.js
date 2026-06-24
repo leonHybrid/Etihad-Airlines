@@ -14,9 +14,9 @@ const CONFIG = {
   page1Bg: `${BASE}img/bg1.png`,
   page2Bg: `${BASE}img/bg2.png`,
 
-  // Green area: video driven by the websocket. Served at <base>videos/<n>.mp4.
-  videoCount: 11,
-  scenePoster: `${BASE}img/scene-poster.jpg`, // still shown before a video arrives
+  // Scene area: a static placeholder image (no video). The websocket integer
+  // still drives the city label below the logo.
+  scenePlaceholder: `${BASE}img/scene-placeholder.svg`,
 
   // Red area: the side-scroll tray. ARRAY ORDER = icon id sent over the socket.
   // Add/remove freely; the arrows and dots adapt. Animated .gif works.
@@ -43,7 +43,6 @@ const STORAGE_KEY = 'etihadVibeCompleted_v1';
 // ── State ───────────────────────────────────────────────────────────────────
 let dragged = null;
 let nextStickerId = 0; // unique id per placed sticker; resets on Reset
-let player = null;
 let app = null;
 
 // ── Boot ────────────────────────────────────────────────────────────────────
@@ -57,7 +56,7 @@ function boot() {
     localStorage.removeItem(STORAGE_KEY);
   }
 
-  connect(); // websocket runs for the whole session; playVideo() no-ops on page 2
+  connect(); // websocket runs for the whole session; updateLocation() no-ops on page 2
 
   if (hasCompleted()) renderThanksPage();
   else renderStickerPage();
@@ -105,29 +104,30 @@ function renderStickerPage() {
         <span id="locationText">${CONFIG.cities[0]}</span>
       </div>
 
-      <div id="scene" class="scene">
-        <video id="player" muted playsinline loop poster="${CONFIG.scenePoster}"></video>
-      </div>
-
-      <section class="sticker-panel">
-        <h2>Just like VIBE, you can customise your experience. Select up to three stickers you would like to see in your destination.</h2>
-        <div class="tray-row">
-          <button class="tray-arrow" id="trayPrev" aria-label="Previous stickers">&#8249;</button>
-          <div id="tray" class="tray"></div>
-          <button class="tray-arrow" id="trayNext" aria-label="More stickers">&#8250;</button>
+      <div class="lower">
+        <div id="scene" class="scene">
+          <img class="scene-placeholder" src="${CONFIG.scenePlaceholder}" alt="" draggable="false">
         </div>
-        <div id="dots" class="dots"></div>
-      </section>
 
-      <div class="actions">
-        <button id="resetBtn" class="btn btn-reset">Reset</button>
-        <button id="doneBtn"  class="btn btn-done">Done</button>
+        <section class="sticker-panel">
+          <h2>Just like VIBE, you can customise your experience. Select up to three stickers you would like to see in your destination.</h2>
+          <div class="tray-row">
+            <button class="tray-arrow" id="trayPrev" aria-label="Previous stickers">&#8249;</button>
+            <div id="tray" class="tray"></div>
+            <button class="tray-arrow" id="trayNext" aria-label="More stickers">&#8250;</button>
+          </div>
+          <div id="dots" class="dots"></div>
+        </section>
+
+        <div class="actions">
+          <button id="resetBtn" class="btn btn-reset">Reset</button>
+          <button id="doneBtn"  class="btn btn-done">Done</button>
+        </div>
       </div>
     </div>
   `;
 
   const scene = document.getElementById('scene');
-  player = document.getElementById('player');
   const tray = document.getElementById('tray');
 
   CONFIG.stickers.forEach((sticker, i) => {
@@ -295,23 +295,18 @@ function setupTrayNav() {
 
 // ── Page 2: thank you — single image + one button overlay ───────────────────
 function renderThanksPage() {
-  player = null;
   app.innerHTML = `
     <div class="page page-thanks" style="background-image:url('${CONFIG.page2Bg}')"></div>
   `;
 }
 
-// ── Video driven by the socket ──────────────────────────────────────────────
-function playVideo(n) {
-  if (!player) return; // we're on the thank-you page
-  if (n < 0 || n >= CONFIG.videoCount) { console.warn('no video mapped for', n); return; }
-  player.src = `${BASE}videos/${n}.mp4`;
-  player.play().catch((err) => console.warn('play blocked:', err));
+// ── City label driven by the socket ─────────────────────────────────────────
+// The integer the server sends selects the destination shown under the logo.
+function updateLocation(n) {
   const city = CONFIG.cities[n];
-  if (city) {
-    const el = document.getElementById('locationText');
-    if (el) el.textContent = city;
-  }
+  if (!city) return;
+  const el = document.getElementById('locationText'); // absent on the thanks page
+  if (el) el.textContent = city;
 }
 
 // ── WebSocket with heartbeat + auto-reconnect ───────────────────────────────
@@ -349,8 +344,8 @@ function connect() {
     }
 
     const n = parseInt(data, 10);
-    if (String(n) === data && n >= 0 && n <= CONFIG.videoCount - 1) {
-      playVideo(n);
+    if (String(n) === data && n >= 0 && n < CONFIG.cities.length) {
+      updateLocation(n);
     } else {
       console.log('server said:', e.data);
     }

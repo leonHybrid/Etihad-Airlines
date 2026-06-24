@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2b3f4d"/>
+      <stop offset="1" stop-color="#16242e"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="500" fill="url(#sky)"/>
+  <!-- soft clouds -->
+  <g fill="#ffffff" opacity="0.10">
+    <ellipse cx="180" cy="150" rx="140" ry="48"/>
+    <ellipse cx="300" cy="170" rx="110" ry="40"/>
+    <ellipse cx="620" cy="360" rx="160" ry="52"/>
+    <ellipse cx="500" cy="380" rx="120" ry="42"/>
+  </g>
+  <text x="400" y="265" text-anchor="middle"
+        font-family="Poppins, system-ui, sans-serif" font-size="34"
+        font-weight="600" fill="#ffffff" opacity="0.85"
+        letter-spacing="3">YOUR DESTINATION</text>
+</svg>
