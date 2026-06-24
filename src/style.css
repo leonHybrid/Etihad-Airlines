@@ -144,6 +144,7 @@ body {
 
 /* Placeholder image area (no video) — shrinks first when height is tight. */
 .scene {
+  position: relative; /* positioning context for dropped .placed-sticker */
   flex: 1 1 auto;
   min-height: 0;
   border-radius: 4cqw;
