@@ -54,6 +54,8 @@ let app = null;
 function boot() {
   app = document.getElementById('app');
 
+  preventZoom();
+
   // ?reset clears the one-visit flag — handy for testing on the same device.
   if (new URLSearchParams(location.search).has('reset')) {
     localStorage.removeItem(STORAGE_KEY);
@@ -63,6 +65,31 @@ function boot() {
 
   if (hasCompleted()) renderThanksPage();
   else renderStickerPage();
+}
+
+// iOS Safari ignores user-scalable=no, so kill the gestures explicitly:
+// pinch-zoom, double-tap-to-zoom, and desktop ctrl/⌘ + wheel zoom.
+function preventZoom() {
+  ['gesturestart', 'gesturechange', 'gestureend'].forEach((type) =>
+    document.addEventListener(type, (e) => e.preventDefault(), { passive: false })
+  );
+
+  let lastTouch = 0;
+  document.addEventListener('touchend', (e) => {
+    const now = Date.now();
+    if (now - lastTouch < 350) e.preventDefault(); // double-tap zoom
+    lastTouch = now;
+  }, { passive: false });
+
+  document.addEventListener('wheel', (e) => {
+    if (e.ctrlKey) e.preventDefault(); // trackpad pinch / ctrl+wheel
+  }, { passive: false });
+
+  document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && ['+', '-', '=', '0'].includes(e.key)) {
+      e.preventDefault();
+    }
+  });
 }
 
 function hasCompleted() {
@@ -87,7 +114,7 @@ function renderStickerPage() {
       </div>
 
       <section class="sticker-panel">
-        <h2>Select your stickers!</h2>
+        <h2>Just like VIBE, you can customise your experience. Select up to three stickers you would like to see in your destination.</h2>
         <div class="tray-row">
           <button class="tray-arrow" id="trayPrev" aria-label="Previous stickers">&#8249;</button>
           <div id="tray" class="tray"></div>
