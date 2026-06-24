@@ -341,6 +341,13 @@ function connect() {
     const data = e.data.trim();
     if (data === 'ping' || data === 'pong') return;
 
+    // Remote trigger to finish the experience and jump to the thank-you page.
+    if (data === 'customDone') {
+      markCompleted();
+      renderThanksPage();
+      return;
+    }
+
     const n = parseInt(data, 10);
     if (String(n) === data && n >= 0 && n <= CONFIG.videoCount - 1) {
       playVideo(n);
