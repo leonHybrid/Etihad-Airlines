@@ -21,7 +21,7 @@ const CONFIG = {
   // Red area: the side-scroll tray. ARRAY ORDER = icon id sent over the socket.
   // Add/remove freely; the arrows and dots adapt. Animated .gif works.
   stickers: [
-    { src: `${BASE}stickers/BOBA.webp`,     alt: 'Boba' },
+    { src: `${BASE}stickers/CLOUD.webp`,     alt: 'Boba' },
     { src: `${BASE}stickers/CLOUD.webp`,    alt: 'Cloud' },
     { src: `${BASE}stickers/DUMPLING.webp`,   alt: 'Dumpling' },
     { src: `${BASE}stickers/GATE.webp`,    alt: 'Gate' },
