@@ -124,7 +124,7 @@ function renderStickerPage() {
         </div>
 
         <section class="sticker-panel">
-          <h2>Just like VIBE, you can customise your experience. Select up to three stickers you would like to see in your destination.</h2>
+          <h2>Drag your stickers!</h2>
           <div class="tray-row">
             <button class="tray-arrow" id="trayPrev" aria-label="Previous stickers">&#8249;</button>
             <div id="tray" class="tray"></div>

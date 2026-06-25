@@ -13,8 +13,4 @@
     <ellipse cx="620" cy="360" rx="160" ry="52"/>
     <ellipse cx="500" cy="380" rx="120" ry="42"/>
   </g>
-  <text x="400" y="265" text-anchor="middle"
-        font-family="Poppins, system-ui, sans-serif" font-size="34"
-        font-weight="600" fill="#ffffff" opacity="0.85"
-        letter-spacing="3">YOUR DESTINATION</text>
 </svg>
