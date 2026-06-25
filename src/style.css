@@ -265,8 +265,8 @@ body {
 }
 .sticker:active { cursor: grabbing; transform: scale(0.94); }
 .sticker img {
-  width: 72%;
-  height: 72%;
+  width: 90%;
+  height: 90%;
   object-fit: contain;
   pointer-events: none;
   -webkit-user-drag: none;

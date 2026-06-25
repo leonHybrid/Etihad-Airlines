@@ -307,7 +307,7 @@ function setupTrayNav() {
 function renderThanksPage() {
   app.innerHTML = `
     <div class="page page-thanks" style="background-image:url('${CONFIG.page2Bg}')">
-      <img class="brand-logo" src="${CONFIG.logo}" alt="Etihad VIBE" draggable="false">
+     
     </div>
   `;
 }
