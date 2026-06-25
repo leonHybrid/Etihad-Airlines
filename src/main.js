@@ -42,7 +42,7 @@ const CONFIG = {
 
   locationIcon: `${BASE}img/Spot.png`,
 
-  // Etihad VIBE logo, overlaid as its own element (a fixed distance from the
+  // Etihad VIBE logo, overlaid as its own element (a fixed distance from
   // top) so it stays put across devices. Remove it from page1Bg/page2Bg.
   logo: `${BASE}img/logo.png`,
 };
