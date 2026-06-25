@@ -113,9 +113,9 @@ function renderStickerPage() {
   app.innerHTML = `
     <div class="page page-sticker" style="background-image:url('${CONFIG.page1Bg}')">
       <img class="brand-logo" src="${CONFIG.logo}" alt="Etihad VIBE" draggable="false">
-      <div class="location-label" id="locationLabel">
+      <div class="location-label" id="locationLabel" style="visibility:hidden">
         <img src="${CONFIG.locationIcon}" alt="">
-        <span id="locationText">${CONFIG.cities[0]}</span>
+        <span id="locationText"></span>
       </div>
 
       <div class="lower">
@@ -318,7 +318,11 @@ function updateLocation(n) {
   const city = CONFIG.cities[n];
   if (!city) return;
   const el = document.getElementById('locationText'); // absent on the thanks page
-  if (el) el.textContent = city;
+  if (el) {
+    el.textContent = city;
+    const label = document.getElementById('locationLabel');
+    if (label) label.style.visibility = 'visible'; // reveal only after first real signal
+  }
 }
 
 // ── WebSocket with heartbeat + auto-reconnect ───────────────────────────────
@@ -346,6 +350,7 @@ function connect() {
 
   socket.addEventListener('message', (e) => {
     const data = e.data.trim();
+    console.log('raw message:', JSON.stringify(e.data));
     if (data === 'ping' || data === 'pong') return;
 
     // Remote trigger to finish the experience and jump to the thank-you page.
