@@ -297,9 +297,9 @@ function setupTrayNav() {
   const next = document.getElementById('trayNext');
   const dots = document.getElementById('dots');
 
-  const pageWidth = () => tray.clientWidth; // one full page = the 4 visible columns
-  prev.addEventListener('click', () => tray.scrollBy({ left: -pageWidth() }));
-  next.addEventListener('click', () => tray.scrollBy({ left: pageWidth() }));
+  const tileWidth = () => tray.querySelector('.sticker')?.getBoundingClientRect().width ?? tray.clientWidth / 4;
+  prev.addEventListener('click', () => tray.scrollBy({ left: -tileWidth() * 4, behavior: 'smooth' }));
+  next.addEventListener('click', () => tray.scrollBy({ left: tileWidth() * 4, behavior: 'smooth' }));
 
   const pageCount = () => Math.max(1, Math.round(tray.scrollWidth / tray.clientWidth));
 
