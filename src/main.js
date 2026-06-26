@@ -179,11 +179,11 @@ function renderStickerPage() {
       e.preventDefault();
       const ghost = document.createElement('div');
       ghost.className = 'drag-ghost';
-      ghost.innerHTML = `<img src="${sticker.src}" alt="${sticker.alt}" draggable="false">`;
+      ghost.innerHTML = `<img src="${sticker.src}" alt="${sticker.alt}" draggable="false" style="transform:scale(${sticker.scale ?? 1})">`;
       ghost.style.left = e.clientX + 'px';
       ghost.style.top = e.clientY + 'px';
       document.body.appendChild(ghost);
-      dragged = { icon: i, src: sticker.src, alt: sticker.alt, ghost };
+      dragged = { icon: i, src: sticker.src, alt: sticker.alt, scale: sticker.scale, ghost };
       el.setPointerCapture(e.pointerId);
     });
 
@@ -233,7 +233,7 @@ function placeSticker(scene, sticker, nx, ny, iconId, instanceId) {
   el.dataset.instance = instanceId; // which placed instance (unique)
   el.style.left = (nx * 100) + '%';
   el.style.top = (ny * 100) + '%';
-  el.innerHTML = `<img src="${sticker.src}" alt="${sticker.alt}" draggable="false">`;
+  el.innerHTML = `<img src="${sticker.src}" alt="${sticker.alt}" draggable="false" style="transform:scale(${sticker.scale ?? 1})">`;
 
   let moving = false;
   let lastSent = 0;
