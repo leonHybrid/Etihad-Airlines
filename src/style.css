@@ -215,6 +215,7 @@ body {
   background: var(--panel-bg);
   border: 1px solid var(--panel-border);
   border-radius: 6cqw;
+  overflow: hidden;
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
   box-shadow: 0 2cqw 6cqw rgba(0, 0, 0, 0.18);
