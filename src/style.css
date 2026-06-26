@@ -277,6 +277,7 @@ body {
   flex: none;
   width: 8.5cqw;
   height: 8.5cqw;
+  padding: 0;
   border: none;
   border-radius: 50%;
   background: rgba(0, 0, 0, 0.28);
@@ -284,8 +285,8 @@ body {
   font-size: 5cqw;
   line-height: 1;
   cursor: pointer;
-  display: grid;
-  place-items: center;
+  appearance: none;
+  -webkit-appearance: none;
   display: grid;
   place-items: center;
   transition: background 0.15s ease, opacity 0.15s ease;
