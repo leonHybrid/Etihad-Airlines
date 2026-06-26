@@ -21,18 +21,42 @@ const CONFIG = {
   // Red area: the side-scroll tray. ARRAY ORDER = icon id sent over the socket.
   // Add/remove freely; the arrows and dots adapt. Animated .gif works.
   stickers: [
-    { src: `${BASE}stickers/BOBA.webp`,     alt: 'Boba' },
-    { src: `${BASE}stickers/CLOUD.webp`,    alt: 'Cloud' },
-    { src: `${BASE}stickers/DUMPLING.webp`,   alt: 'Dumpling' },
-    { src: `${BASE}stickers/GATE.webp`,    alt: 'Gate' },
-    { src: `${BASE}stickers/LANTERN.webp`, alt: 'Lantern' },
-    { src: `${BASE}stickers/SUN.webp`,    alt: 'Sun' },
-       { src: `${BASE}stickers/BOBA1.webp`,     alt: 'Boba' },
-    { src: `${BASE}stickers/CLOUD1.webp`,    alt: 'Cloud' },
-    { src: `${BASE}stickers/DUMPLING1.webp`,   alt: 'Dumpling' },
-    { src: `${BASE}stickers/GATE1.webp`,    alt: 'Gate' },
-    { src: `${BASE}stickers/LANTERN1.webp`, alt: 'Lantern' },
-    { src: `${BASE}stickers/SUN1.webp`,    alt: 'Sun' },
+    { src: `${BASE}stickers/26_06_26_Airplane.webp`,        alt: 'Airplane' },
+    { src: `${BASE}stickers/26_06_26_Apple.webp`,           alt: 'Apple' },
+    { src: `${BASE}stickers/26_06_26_Bag Phone.webp`,       alt: 'Bag Phone' },
+    { src: `${BASE}stickers/26_06_26_Bag Pizza.webp`,       alt: 'Bag Pizza' },
+    { src: `${BASE}stickers/26_06_26_Bag.webp`,             alt: 'Bag' },
+    { src: `${BASE}stickers/26_06_26_Bagget.webp`,          alt: 'Baguette' },
+    { src: `${BASE}stickers/26_06_26_Bobba.webp`,           alt: 'Boba' },
+    { src: `${BASE}stickers/26_06_26_Boxing.webp`,          alt: 'Boxing' },
+    { src: `${BASE}stickers/26_06_26_Bus.webp`,             alt: 'Bus' },
+    { src: `${BASE}stickers/26_06_26_Cloud.webp`,           alt: 'Cloud' },
+    { src: `${BASE}stickers/26_06_26_Dog.webp`,             alt: 'Dog' },
+    { src: `${BASE}stickers/26_06_26_Dumpling.webp`,        alt: 'Dumpling' },
+    { src: `${BASE}stickers/26_06_26_Elephant.webp`,        alt: 'Elephant' },
+    { src: `${BASE}stickers/26_06_26_Flower Pink.webp`,     alt: 'Flower Pink' },
+    { src: `${BASE}stickers/26_06_26_Flower White.webp`,    alt: 'Flower White' },
+    { src: `${BASE}stickers/26_06_26_Guard.webp`,           alt: 'Guard' },
+    { src: `${BASE}stickers/26_06_26_Heart.webp`,           alt: 'Heart' },
+    { src: `${BASE}stickers/26_06_26_Hot Air Balloon.webp`, alt: 'Hot Air Balloon' },
+    { src: `${BASE}stickers/26_06_26_Hot Dog Camera.webp`,  alt: 'Hot Dog Camera' },
+    { src: `${BASE}stickers/26_06_26_Liberty.webp`,         alt: 'Liberty' },
+    { src: `${BASE}stickers/26_06_26_Macaroon.webp`,        alt: 'Macaroon' },
+    { src: `${BASE}stickers/26_06_26_Mango.webp`,           alt: 'Mango' },
+    { src: `${BASE}stickers/26_06_26_Mime.webp`,            alt: 'Mime' },
+    { src: `${BASE}stickers/26_06_26_Peacock.webp`,         alt: 'Peacock' },
+    { src: `${BASE}stickers/26_06_26_Pretzil.webp`,         alt: 'Pretzel' },
+    { src: `${BASE}stickers/26_06_26_Rainbow.webp`,         alt: 'Rainbow' },
+    { src: `${BASE}stickers/26_06_26_Ramen.webp`,           alt: 'Ramen' },
+    { src: `${BASE}stickers/26_06_26_Sandwhich.webp`,       alt: 'Sandwich' },
+    { src: `${BASE}stickers/26_06_26_Star.webp`,            alt: 'Star' },
+    { src: `${BASE}stickers/26_06_26_Sun.webp`,             alt: 'Sun' },
+    { src: `${BASE}stickers/26_06_26_Surf.webp`,            alt: 'Surf' },
+    { src: `${BASE}stickers/26_06_26_Take.webp`,            alt: 'Take' },
+    { src: `${BASE}stickers/26_06_26_Ticket.webp`,          alt: 'Ticket' },
+    { src: `${BASE}stickers/26_06_26_Vacation Phone.webp`,  alt: 'Vacation Phone' },
+    { src: `${BASE}stickers/26_06_26_Vacation Starfish.webp`, alt: 'Vacation Starfish' },
+    { src: `${BASE}stickers/26_06_26_Yellow Taxi.webp`,     alt: 'Yellow Taxi' },
   ],
 
   appUrl: 'https://example.com/app', // download button target on page 2
@@ -105,8 +129,8 @@ function markCompleted() {
   try { localStorage.setItem(STORAGE_KEY, 'true'); } catch { /* private mode */ }
 }
 
-// Map a full sticker path to its static tray thumbnail in /stickers/thumbs/.
-const thumbOf = (src) => src.replace('/stickers/', '/stickers/thumbs/');
+// No separate thumbs for these stickers — use the same source image.
+const thumbOf = (src) => src;
 
 // ── Page 1: sticker builder ─────────────────────────────────────────────────
 function renderStickerPage() {
