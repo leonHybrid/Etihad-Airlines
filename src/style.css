@@ -285,6 +285,8 @@ body {
   cursor: pointer;
   display: grid;
   place-items: center;
+  display: grid;
+  place-items: center;
   transition: background 0.15s ease, opacity 0.15s ease;
 }
 .tray-arrow:hover { background: rgba(0, 0, 0, 0.42); }
