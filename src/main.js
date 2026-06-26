@@ -167,12 +167,9 @@ function renderStickerPage() {
   const scene = document.getElementById('scene');
   const tray = document.getElementById('tray');
 
-  CONFIG.stickers.forEach((sticker, i) => {
+  const stickerEls = CONFIG.stickers.map((sticker, i) => {
     const el = document.createElement('div');
     el.className = 'sticker';
-    // Tray uses a tiny static thumbnail (first frame). The heavy animated webp
-    // is only loaded for the drag ghost and the placed sticker, so the tray
-    // doesn't animate a dozen large files at once.
     el.innerHTML = `<img src="${thumbOf(sticker.src)}" alt="${sticker.alt}" draggable="false" loading="lazy" style="transform:scale(${sticker.scale ?? 1})">`;
 
     el.addEventListener('pointerdown', (e) => {
@@ -204,7 +201,6 @@ function renderStickerPage() {
         const ny = py / rect.height;
         const instanceId = nextStickerId++;
         placeSticker(scene, dragged, nx, ny, dragged.icon, instanceId);
-        // message format: x y instanceId iconId
         sendSafe(`${nx.toFixed(4)} ${ny.toFixed(4)} ${instanceId} ${dragged.icon}`);
       }
       dragged = null;
@@ -212,10 +208,10 @@ function renderStickerPage() {
 
     el.addEventListener('pointercancel', () => { dragged?.ghost?.remove(); dragged = null; });
 
-    tray.appendChild(el);
+    return el;
   });
 
-  setupTrayNav();
+  setupTrayNav(tray, stickerEls);
 
   document.getElementById('resetBtn').addEventListener('click', () => {
     sendSafe('reset');
@@ -290,41 +286,46 @@ function resyncStickers() {
   });
 }
 
-// ── Tray side-scroll: arrows + pagination dots ──────────────────────────────
-function setupTrayNav() {
-  const tray = document.getElementById('tray');
+// ── Tray paging: shows 8 stickers (4×2) per page, arrow buttons switch pages ──
+function setupTrayNav(tray, stickerEls) {
   const prev = document.getElementById('trayPrev');
   const next = document.getElementById('trayNext');
   const dots = document.getElementById('dots');
+  const PAGE_SIZE = 8;
+  const totalPages = Math.ceil(stickerEls.length / PAGE_SIZE);
+  let currentPage = 0;
 
-  const tileWidth = () => tray.querySelector('.sticker')?.getBoundingClientRect().width ?? tray.clientWidth / 4;
-  prev.addEventListener('click', () => tray.scrollBy({ left: -tileWidth() * 4, behavior: 'smooth' }));
-  next.addEventListener('click', () => tray.scrollBy({ left: tileWidth() * 4, behavior: 'smooth' }));
+  // Build dots
+  dots.innerHTML = totalPages <= 1
+    ? ''
+    : Array.from({ length: totalPages }, () => '<span class="dot"></span>').join('');
 
-  const pageCount = () => Math.max(1, Math.round(tray.scrollWidth / tray.clientWidth));
+  function renderPage() {
+    tray.innerHTML = '';
+    const start = currentPage * PAGE_SIZE;
+    const pageItems = stickerEls.slice(start, start + PAGE_SIZE);
+    pageItems.forEach(el => tray.appendChild(el));
 
-  function renderDots() {
-    const pages = pageCount();
-    dots.innerHTML = pages <= 1
-      ? ''
-      : Array.from({ length: pages }, () => '<span class="dot"></span>').join('');
-    updateState();
+    // Pad last page with invisible tiles so the 4×2 grid stays full
+    const remainder = pageItems.length % PAGE_SIZE;
+    if (remainder > 0) {
+      for (let i = remainder; i < PAGE_SIZE; i++) {
+        const placeholder = document.createElement('div');
+        placeholder.className = 'sticker sticker-placeholder';
+        tray.appendChild(placeholder);
+      }
+    }
+
+    prev.disabled = currentPage === 0;
+    next.disabled = currentPage >= totalPages - 1;
+
+    dots.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === currentPage));
   }
 
-  function updateState() {
-    const max = tray.scrollWidth - tray.clientWidth;
-    prev.disabled = tray.scrollLeft <= 2;
-    next.disabled = tray.scrollLeft >= max - 2;
-    const dotEls = dots.querySelectorAll('.dot');
-    if (!dotEls.length) return;
-    const active = max <= 0 ? 0 : Math.round((tray.scrollLeft / max) * (dotEls.length - 1));
-    dotEls.forEach((d, i) => d.classList.toggle('active', i === active));
-  }
+  prev.addEventListener('click', () => { if (currentPage > 0) { currentPage--; renderPage(); } });
+  next.addEventListener('click', () => { if (currentPage < totalPages - 1) { currentPage++; renderPage(); } });
 
-  tray.addEventListener('scroll', updateState, { passive: true });
-  window.addEventListener('resize', renderDots);
-  renderDots();
-  setTimeout(renderDots, 300); // settle after gifs load and change scrollWidth
+  renderPage();
 }
 
 // ── Page 2: thank you — single image + one button overlay ───────────────────

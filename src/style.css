@@ -234,20 +234,11 @@ body {
 
 .tray {
   display: grid;
-  grid-auto-flow: column;
-  /* Exactly 4 columns: each a quarter of the tray's width minus the 3 gaps. */
-  grid-auto-columns: calc((100% - 3 * var(--tray-gap)) / 4);
-  /* Rows size to content; each sticker is aspect-ratio:1, so rows == column width. */
+  grid-template-columns: repeat(4, 1fr);
   grid-template-rows: repeat(2, auto);
   gap: var(--tray-gap);
   flex: 1;
-  overflow-x: auto;
-  scroll-behavior: smooth;
-  scroll-snap-type: x mandatory;
-  -ms-overflow-style: none;
-  scrollbar-width: none;
 }
-.tray::-webkit-scrollbar { display: none; }
 
 .sticker {
   width: 100%;
@@ -264,6 +255,7 @@ body {
   transition: transform 0.12s ease;
 }
 .sticker:active { cursor: grabbing; transform: scale(0.94); }
+.sticker-placeholder { background: transparent; box-shadow: none; pointer-events: none; }
 .sticker img {
   width: 98%;
   height: 98%;
